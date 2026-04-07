@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FRR – Order Summary</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d0d0d;
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+      border-bottom: 3px solid #d4af37;
+      padding: 36px 24px 28px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: #d4af37;
+      text-transform: uppercase;
+    }
+    header p {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      color: #888;
+      text-transform: uppercase;
+    }
+    .subtitle-bar {
+      margin-top: 20px;
+      display: inline-block;
+      background: #d4af37;
+      color: #0d0d0d;
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 24px;
+      border-radius: 2px;
+    }
+
+    /* ── ORDER SUMMARY STRIP ── */
+    .order-summary-strip {
+      max-width: 900px;
+      margin: 28px auto 0;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .summary-stat {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .summary-stat .stat-label {
+      font-size: 0.65rem;
+      color: #666;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .summary-stat .stat-val {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #d4af37;
+      margin-top: 4px;
+    }
+
+    /* ── DESIGN CARDS ── */
+    .designs {
+      max-width: 900px;
+      margin: 32px auto 40px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .design-card {
+      background: #161616;
+      border: 1px solid #252525;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .mockup-side {
+      width: 260px;
+      min-height: 200px;
+      flex-shrink: 0;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      border-right: 1px solid #222;
+    }
+    .mockup-side img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+
+    .card-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-info .card-header {
+      background: #1e1e1e;
+      border-bottom: 2px solid #d4af37;
+      padding: 14px 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .card-info .card-header h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #d4af37;
+    }
+    .card-info .card-header .design-meta {
+      font-size: 0.72rem;
+      color: #666;
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+    .garment-badge {
+      display: inline-block;
+      background: #2a2a2a;
+      color: #ccc;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .garment-badge .badge-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .dot-mid  { background: #4a90d9; }
+    .dot-crew { background: #e07b4a; }
+
+    /* ── SIZE TABLE ── */
+    .size-table-wrap {
+      padding: 16px 20px 20px;
+    }
+    .size-table-wrap .table-label {
+      font-size: 0.65rem;
+      color: #555;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .size-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 4px;
+    }
+    .size-table thead th {
+      font-size: 0.6rem;
+      color: #666;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 6px 12px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .size-table thead th:nth-child(3),
+    .size-table thead th:last-child {
+      text-align: right;
+    }
+    .size-table tbody tr {
+      background: #1a1a1a;
+    }
+    .size-table tbody td {
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      color: #ccc;
+      vertical-align: middle;
+    }
+    .size-table tbody td:first-child {
+      border-radius: 6px 0 0 6px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #eee;
+    }
+    .size-table tbody td:last-child {
+      border-radius: 0 6px 6px 0;
+    }
+    .size-table tbody td:nth-child(3),
+    .size-table tbody td:last-child {
+      text-align: right;
+    }
+    .size-table tbody td:last-child {
+      font-weight: 700;
+      color: #d4af37;
+    }
+
+    .size-table tfoot td {
+      padding: 12px 12px;
+      border-top: 2px solid #d4af37;
+    }
+    .size-table tfoot .sub-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #888;
+    }
+    .size-table tfoot .sub-qty {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #888;
+      text-align: right;
+    }
+    .size-table tfoot .sub-total {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #d4af37;
+      text-align: right;
+    }
+
+    /* ── GRAND TOTAL ── */
+    .grand-total-bar {
+      max-width: 900px;
+      margin: 0 auto 48px;
+      padding: 0 20px;
+    }
+    .grand-total-inner {
+      background: linear-gradient(135deg, #1e1c10 0%, #1a1810 100%);
+      border: 2px solid #d4af37;
+      border-radius: 10px;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .gt-left .gt-label {
+      font-size: 0.7rem;
+      color: #888;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .gt-left .gt-shirts {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 2px;
+    }
+    .gt-right .gt-amount {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #d4af37;
+      letter-spacing: 2px;
+    }
+
+    /* ── FOOTER ── */
+    .footer-note {
+      max-width: 900px;
+      margin: 0 auto 48px;
+      padding: 18px 24px;
+      background: #161616;
+      border: 1px solid #222;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      color: #666;
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+      text-align: center;
+    }
+    .footer-note strong { color: #888; }
+
+    @media (max-width: 700px) {
+      .card-top { flex-direction: column; }
+      .mockup-side { width: 100%; border-right: none; border-bottom: 1px solid #222; }
+      .order-summary-strip { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ HEADER ══════════════════════════════ -->
+<header>
+  <h1>FRR &nbsp;·&nbsp; Order Summary</h1>
+  <p>For Real Riders — Custom Apparel</p>
+  <div class="subtitle-bar">Order Details &nbsp;·&nbsp; 32 Garments &nbsp;·&nbsp; 3 Designs</div>
+</header>
+
+<!-- ══════════════════════════════ ORDER STATS ══════════════════════════════ -->
+<div class="order-summary-strip">
+  <div class="summary-stat">
+    <div class="stat-label">Total Garments</div>
+    <div class="stat-val">32</div>
+  </div>
+  <div class="summary-stat">
+    <div class="stat-label">Designs</div>
+    <div class="stat-val">3</div>
+  </div>
+  <div class="summary-stat">
+    <div class="stat-label">Order Total</div>
+    <div class="stat-val">$667.00</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ DESIGN CARDS ══════════════════════════════ -->
+<div class="designs">
+
+  <!-- ══════ CARD 1: FRR Script Logo — Mid Grade ══════ -->
+  <div class="design-card">
+    <div class="card-top">
+      <div class="mockup-side">
+        <img src="FRR_script_logo.jpeg" alt="FRR Script Logo" />
+      </div>
+      <div class="card-info">
+        <div class="card-header">
+          <h3>FRR Script Logo</h3>
+          <div class="design-meta">Front Print Only</div>
+          <div class="garment-badge"><span class="badge-dot dot-mid"></span>Mid Grade T-Shirt</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="size-table-wrap">
+      <div class="table-label">Size Breakdown — 18 Shirts</div>
+      <table class="size-table">
+        <thead>
+          <tr><th>Size</th><th>Qty</th><th>Price Each</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Small</td>
+            <td>2</td>
+            <td style="text-align:right;">$16.45</td>
+            <td>$32.90</td>
+          </tr>
+          <tr>
+            <td>Medium</td>
+            <td>3</td>
+            <td style="text-align:right;">$16.45</td>
+            <td>$49.35</td>
+          </tr>
+          <tr>
+            <td>Large</td>
+            <td>5</td>
+            <td style="text-align:right;">$16.45</td>
+            <td>$82.25</td>
+          </tr>
+          <tr>
+            <td>XL</td>
+            <td>4</td>
+            <td style="text-align:right;">$16.45</td>
+            <td>$65.80</td>
+          </tr>
+          <tr>
+            <td>2XL</td>
+            <td>2</td>
+            <td style="text-align:right;">$21.45</td>
+            <td>$42.90</td>
+          </tr>
+          <tr>
+            <td>3XL</td>
+            <td>2</td>
+            <td style="text-align:right;">$21.45</td>
+            <td>$42.90</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="sub-label">Subtotal</td>
+            <td class="sub-qty">18</td>
+            <td></td>
+            <td class="sub-total">$316.10</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════ CARD 2: Skull & Fire Fingers — Mid Grade ══════ -->
+  <div class="design-card">
+    <div class="card-top">
+      <div class="mockup-side">
+        <img src="Skull_and_finger.jpeg" alt="Skull & Fire Fingers" />
+      </div>
+      <div class="card-info">
+        <div class="card-header">
+          <h3>Skull &amp; Fire Fingers</h3>
+          <div class="design-meta">Front + Back Print</div>
+          <div class="garment-badge"><span class="badge-dot dot-mid"></span>Mid Grade T-Shirt</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="size-table-wrap">
+      <div class="table-label">Size Breakdown — 8 Shirts</div>
+      <table class="size-table">
+        <thead>
+          <tr><th>Size</th><th>Qty</th><th>Price Each</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Small</td>
+            <td>1</td>
+            <td style="text-align:right;">$22.95</td>
+            <td>$22.95</td>
+          </tr>
+          <tr>
+            <td>Medium</td>
+            <td>1</td>
+            <td style="text-align:right;">$22.95</td>
+            <td>$22.95</td>
+          </tr>
+          <tr>
+            <td>Large</td>
+            <td>2</td>
+            <td style="text-align:right;">$22.95</td>
+            <td>$45.90</td>
+          </tr>
+          <tr>
+            <td>XL</td>
+            <td>2</td>
+            <td style="text-align:right;">$22.95</td>
+            <td>$45.90</td>
+          </tr>
+          <tr>
+            <td>2XL</td>
+            <td>1</td>
+            <td style="text-align:right;">$27.95</td>
+            <td>$27.95</td>
+          </tr>
+          <tr>
+            <td>3XL</td>
+            <td>1</td>
+            <td style="text-align:right;">$27.95</td>
+            <td>$27.95</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="sub-label">Subtotal</td>
+            <td class="sub-qty">8</td>
+            <td></td>
+            <td class="sub-total">$193.60</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════ CARD 3: Patch & Bike Life — Crew Neck ══════ -->
+  <div class="design-card">
+    <div class="card-top">
+      <div class="mockup-side">
+        <img src="Patch_and_Bikelife.jpeg" alt="Patch & Bike Life" />
+      </div>
+      <div class="card-info">
+        <div class="card-header">
+          <h3>4 Real Riders — Patch &amp; Bike Life</h3>
+          <div class="design-meta">Front + Back Print</div>
+          <div class="garment-badge"><span class="badge-dot dot-crew"></span>Crew Neck Sweatshirt</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="size-table-wrap">
+      <div class="table-label">Size Breakdown — 6 Garments</div>
+      <table class="size-table">
+        <thead>
+          <tr><th>Size</th><th>Qty</th><th>Price Each</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Small</td>
+            <td>1</td>
+            <td style="text-align:right;">$24.55</td>
+            <td>$24.55</td>
+          </tr>
+          <tr>
+            <td>Medium</td>
+            <td>1</td>
+            <td style="text-align:right;">$24.55</td>
+            <td>$24.55</td>
+          </tr>
+          <tr>
+            <td>Large</td>
+            <td>1</td>
+            <td style="text-align:right;">$24.55</td>
+            <td>$24.55</td>
+          </tr>
+          <tr>
+            <td>XL</td>
+            <td>1</td>
+            <td style="text-align:right;">$24.55</td>
+            <td>$24.55</td>
+          </tr>
+          <tr>
+            <td>2XL</td>
+            <td>1</td>
+            <td style="text-align:right;">$29.55</td>
+            <td>$29.55</td>
+          </tr>
+          <tr>
+            <td>3XL</td>
+            <td>1</td>
+            <td style="text-align:right;">$29.55</td>
+            <td>$29.55</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="sub-label">Subtotal</td>
+            <td class="sub-qty">6</td>
+            <td></td>
+            <td class="sub-total">$157.30</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /designs -->
+
+<!-- ══════════════════════════════ GRAND TOTAL ══════════════════════════════ -->
+<div class="grand-total-bar">
+  <div class="grand-total-inner">
+    <div class="gt-left">
+      <div class="gt-label">Order Total</div>
+      <div class="gt-shirts">32 garments across 3 designs &nbsp;·&nbsp; Design + print included</div>
+    </div>
+    <div class="gt-right">
+      <div class="gt-amount">$667.00</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ FOOTER ══════════════════════════════ -->
+<div class="footer-note">
+  All prices are <strong>per garment</strong> and include design and print. Taxes and shipping are not included.
+</div>
+
+</body>
+</html>

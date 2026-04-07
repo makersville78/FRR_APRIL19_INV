@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FRR – Invoice</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d0d0d;
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+      border-bottom: 3px solid #d4af37;
+      padding: 36px 24px 28px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header-left h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: #d4af37;
+      text-transform: uppercase;
+    }
+    .header-left p {
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .header-right {
+      text-align: right;
+    }
+    .header-right .inv-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #d4af37;
+      letter-spacing: 4px;
+    }
+    .header-right .inv-meta {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── META ROW ── */
+    .meta-row {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .meta-item .meta-label {
+      font-size: 0.6rem;
+      color: #555;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .meta-item .meta-val {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #f0f0f0;
+      margin-top: 4px;
+    }
+
+    /* ── DESIGN SECTIONS ── */
+    .invoice-body {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 24px 0;
+    }
+
+    .design-section {
+      margin-bottom: 28px;
+    }
+
+    .design-header {
+      background: #1e1e1e;
+      border-radius: 6px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-left: 3px solid #d4af37;
+      margin-bottom: 10px;
+    }
+    .design-header h3 {
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #d4af37;
+    }
+    .design-header .design-detail {
+      font-size: 0.68rem;
+      color: #888;
+      letter-spacing: 1px;
+    }
+
+    /* ── TABLE ── */
+    .size-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 3px;
+    }
+    .size-table thead th {
+      font-size: 0.6rem;
+      color: #555;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 6px 12px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .size-table thead th.r { text-align: right; }
+
+    .size-table tbody tr {
+      background: #1a1a1a;
+    }
+    .size-table tbody tr:nth-child(odd) {
+      background: #161616;
+    }
+    .size-table tbody td {
+      padding: 9px 12px;
+      font-size: 0.82rem;
+      color: #ccc;
+    }
+    .size-table tbody td:first-child {
+      border-radius: 4px 0 0 4px;
+      font-weight: 700;
+      color: #eee;
+    }
+    .size-table tbody td:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    .size-table tbody td.r {
+      text-align: right;
+    }
+    .size-table tbody td.total-col {
+      text-align: right;
+      font-weight: 700;
+      color: #d4af37;
+    }
+
+    /* subtotal */
+    .size-table tfoot td {
+      padding: 10px 12px;
+      border-top: 1px solid #a08520;
+    }
+    .size-table tfoot .sub-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #888;
+    }
+    .size-table tfoot .sub-qty {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #888;
+    }
+    .size-table tfoot .sub-total {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #d4af37;
+      text-align: right;
+    }
+
+    /* ── TAX & FEES ROW ── */
+    .fees-row {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .fees-inner {
+      border-top: 1px solid #2a2a2a;
+      padding: 14px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .fees-inner .fees-label {
+      background: #1a1a1a;
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      color: #f0f0f0;
+      flex: 1;
+    }
+    .fees-inner .fees-amount {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #d4af37;
+      padding: 10px 16px;
+    }
+
+    /* ── GRAND TOTAL ── */
+    .grand-total-wrap {
+      max-width: 900px;
+      margin: 8px auto 0;
+      padding: 0 24px;
+    }
+    .grand-total {
+      background: linear-gradient(135deg, #1e1c10 0%, #1a1810 100%);
+      border: 2px solid #d4af37;
+      border-radius: 8px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .gt-left .gt-label {
+      font-size: 0.7rem;
+      color: #888;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+    .gt-left .gt-detail {
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 2px;
+    }
+    .gt-right .gt-amount {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #d4af37;
+      letter-spacing: 2px;
+    }
+
+    /* ── DEPOSIT NOTICE ── */
+    .deposit-wrap {
+      max-width: 900px;
+      margin: 14px auto 0;
+      padding: 0 24px;
+    }
+    .deposit-bar {
+      background: #1e1e1e;
+      border-left: 3px solid #d4af37;
+      border-radius: 6px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .deposit-bar .dep-text {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #d4af37;
+      letter-spacing: 0.5px;
+    }
+    .deposit-bar .dep-amount {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #d4af37;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      max-width: 900px;
+      margin: 24px auto 48px;
+      padding: 0 24px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #555;
+      letter-spacing: 0.3px;
+    }
+
+    @media (max-width: 640px) {
+      header { flex-direction: column; gap: 16px; }
+      .header-right { text-align: left; }
+      .meta-row { grid-template-columns: 1fr; }
+      .design-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ HEADER ══════════════════════════════ -->
+<header>
+  <div class="header-left">
+    <h1>FRR</h1>
+    <p>FOR REAL RIDERS</p>
+    <p>Custom Apparel</p>
+  </div>
+  <div class="header-right">
+    <div class="inv-title">INVOICE</div>
+    <div class="inv-meta">Invoice #: FRR-20260407-001</div>
+    <div class="inv-meta">Date: April 07, 2026</div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════ META ROW ══════════════════════════════ -->
+<div class="meta-row">
+  <div class="meta-item">
+    <div class="meta-label">Bill To</div>
+    <div class="meta-val">Client</div>
+  </div>
+  <div class="meta-item">
+    <div class="meta-label">Terms</div>
+    <div class="meta-val">Due on Receipt</div>
+  </div>
+  <div class="meta-item">
+    <div class="meta-label">Order</div>
+    <div class="meta-val">32 Garments &nbsp;|&nbsp; 3 Designs</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ INVOICE BODY ══════════════════════════════ -->
+<div class="invoice-body">
+
+  <!-- ── Design 1: FRR Script Logo ── -->
+  <div class="design-section">
+    <div class="design-header">
+      <h3>FRR Script Logo</h3>
+      <div class="design-detail">Front Print Only &nbsp;|&nbsp; Mid Grade T-Shirt</div>
+    </div>
+    <table class="size-table">
+      <thead>
+        <tr><th>Size</th><th>Qty</th><th class="r">Price Each</th><th class="r">Total</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Small</td><td>2</td><td class="r">$16.45</td><td class="total-col">$32.90</td></tr>
+        <tr><td>Medium</td><td>3</td><td class="r">$16.45</td><td class="total-col">$49.35</td></tr>
+        <tr><td>Large</td><td>5</td><td class="r">$16.45</td><td class="total-col">$82.25</td></tr>
+        <tr><td>XL</td><td>4</td><td class="r">$16.45</td><td class="total-col">$65.80</td></tr>
+        <tr><td>2XL</td><td>2</td><td class="r">$21.45</td><td class="total-col">$42.90</td></tr>
+        <tr><td>3XL</td><td>2</td><td class="r">$21.45</td><td class="total-col">$42.90</td></tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="sub-label">Subtotal</td>
+          <td class="sub-qty">18</td>
+          <td></td>
+          <td class="sub-total">$316.10</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ── Design 2: Skull & Fire Fingers ── -->
+  <div class="design-section">
+    <div class="design-header">
+      <h3>Skull &amp; Fire Fingers</h3>
+      <div class="design-detail">Front + Back Print &nbsp;|&nbsp; Mid Grade T-Shirt</div>
+    </div>
+    <table class="size-table">
+      <thead>
+        <tr><th>Size</th><th>Qty</th><th class="r">Price Each</th><th class="r">Total</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Small</td><td>1</td><td class="r">$22.95</td><td class="total-col">$22.95</td></tr>
+        <tr><td>Medium</td><td>1</td><td class="r">$22.95</td><td class="total-col">$22.95</td></tr>
+        <tr><td>Large</td><td>2</td><td class="r">$22.95</td><td class="total-col">$45.90</td></tr>
+        <tr><td>XL</td><td>2</td><td class="r">$22.95</td><td class="total-col">$45.90</td></tr>
+        <tr><td>2XL</td><td>1</td><td class="r">$27.95</td><td class="total-col">$27.95</td></tr>
+        <tr><td>3XL</td><td>1</td><td class="r">$27.95</td><td class="total-col">$27.95</td></tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="sub-label">Subtotal</td>
+          <td class="sub-qty">8</td>
+          <td></td>
+          <td class="sub-total">$193.60</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ── Design 3: Patch & Bike Life ── -->
+  <div class="design-section">
+    <div class="design-header">
+      <h3>4 Real Riders — Patch &amp; Bike Life</h3>
+      <div class="design-detail">Front + Back Print &nbsp;|&nbsp; Crew Neck Sweatshirt</div>
+    </div>
+    <table class="size-table">
+      <thead>
+        <tr><th>Size</th><th>Qty</th><th class="r">Price Each</th><th class="r">Total</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Small</td><td>1</td><td class="r">$24.55</td><td class="total-col">$24.55</td></tr>
+        <tr><td>Medium</td><td>1</td><td class="r">$24.55</td><td class="total-col">$24.55</td></tr>
+        <tr><td>Large</td><td>1</td><td class="r">$24.55</td><td class="total-col">$24.55</td></tr>
+        <tr><td>XL</td><td>1</td><td class="r">$24.55</td><td class="total-col">$24.55</td></tr>
+        <tr><td>2XL</td><td>1</td><td class="r">$29.55</td><td class="total-col">$29.55</td></tr>
+        <tr><td>3XL</td><td>1</td><td class="r">$29.55</td><td class="total-col">$29.55</td></tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="sub-label">Subtotal</td>
+          <td class="sub-qty">6</td>
+          <td></td>
+          <td class="sub-total">$157.30</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+</div><!-- /invoice-body -->
+
+<!-- ══════════════════════════════ TAX & FEES ══════════════════════════════ -->
+<div class="fees-row">
+  <div class="fees-inner">
+    <div class="fees-label">Tax &amp; Fees</div>
+    <div class="fees-amount">$28.95</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ GRAND TOTAL ══════════════════════════════ -->
+<div class="grand-total-wrap">
+  <div class="grand-total">
+    <div class="gt-left">
+      <div class="gt-label">Order Total</div>
+      <div class="gt-detail">32 garments &nbsp;|&nbsp; 3 designs &nbsp;|&nbsp; Design + print included</div>
+    </div>
+    <div class="gt-right">
+      <div class="gt-amount">$695.95</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ DEPOSIT NOTICE ══════════════════════════════ -->
+<div class="deposit-wrap">
+  <div class="deposit-bar">
+    <div class="dep-text">50% deposit required to begin work:</div>
+    <div class="dep-amount">$347.98</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ FOOTER ══════════════════════════════ -->
+<div class="footer">
+  Prices include design and print. Thank you for your order!
+</div>
+
+</body>
+</html>
